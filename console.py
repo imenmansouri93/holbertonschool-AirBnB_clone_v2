@@ -73,7 +73,7 @@ class HBNBCommand(cmd.Cmd):
                 if pline:
                     # check for *args or **kwargs
                     if pline[0] == '{' and pline[-1] == '}'\
-                            and type(eval(pline)) == dict:
+                            and type(eval(pline)) is dict:
                         _args = pline
                     else:
                         _args = pline.replace(',', '')
@@ -112,50 +112,34 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def check_value(self, value):
-        """
-        check value if is string or int value
-        """
-        arg = ""
-        if value[0] == '"' and value[-1] == '"':
-
-            for i in range(1, len(value) - 1):
-                if value[i] == "_":
-                    arg += " "
-                    continue
-                arg += value[i]
-            return arg
-        elif value.find(".") != -1:
-            return float(value)
-        else:
-            return int(value)
-
     def do_create(self, args):
-        """create Object"""
-        arg = args.split()
+        """Create an object of any class"""
         if not args:
-            print("** class name missing **")
+            print("** class name missing")
             return
-        elif arg[0] not in HBNBCommand.classes:
+        arg_list = args.split()
+        class_name = arg_list[0]
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
 
-        new_instance = eval(arg[0])()
-        print(arg[0])
-        arg.pop(0)
-        for a in arg:
-            a = a.split('=')
-            if len(a) != 2:
-                continue
-            key = a[0]
-            value = a[1]
-            value = self.check_value(value)
-            if value is None:
-                continue
+        new_instance = HBNBCommand.classes[class_name]()
+
+        for arg in arg_list[1:]:
+            param = arg.split("=")
+            key = param[0]
+            value = param[1]
+
+            if value[0] == "\"":
+                value = value.replace("\"", "").replace("_", " ")
+            elif "." in value:
+                value = float(value)
             else:
-                setattr(new_instance, key, value)
-        storage.new(new_instance)
-        storage.save()
+                value = int(value)
+
+            setattr(new_instance, key, value)
+
+        new_instance.save()
         print(new_instance.id)
 
     def help_create(self):
