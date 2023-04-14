@@ -1,10 +1,14 @@
 #!/usr/bin/python3
-""" State Module for HBNB project """
+""" State Module for HBNB project    """
 from models.base_model import BaseModel, Base
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, Sequence, String, DateTime, ForeignKey
 
 
 class Amenity(BaseModel, Base):
+    """Created Amenity class"""
     __tablename__ = 'amenities'
-    name = Column(String(1024), nullable=False)
+
+    name = Column(String(128), nullable=False)
+    place_amenities = relationship('Place', secondary='place_amenity',
+                                   viewonly=False)
